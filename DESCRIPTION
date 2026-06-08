@@ -1,0 +1,30 @@
+Package: GenerateIndexPedigree
+Type: Package
+Title: Generate Pedigrees for Index Case Based On US Census Data
+Version: 1.0.0
+Authors@R: 
+    c(person(given = "Katelyn", 
+		family = "Queen", 
+		email = "kqueen@mednet.ucla.edu", 
+		role = c("aut", "cre", "cph"),
+           	comment = c(ORCID = "0000-0002-8070-3042")),
+           	person(given = "Kevin", 
+		family = "Abuhanna", 
+		email = "kabuhanna@mednet.ucla.edu", 
+		role = c("aut"),
+           	comment = c(ORCID = "0000-0003-0994-7658")),
+      person(given = "Paul", 
+		family = "Spellman", , 
+		email = "pspellman@mednet.ucla.edu", 
+		role = c("aut","cph"),
+           	comment = c(ORCID = "0000-0002-4810-0022")))
+Maintainer: Katelyn Queen <kqueen@mednet.ucla.edu>
+Description: A series of functions to generate a pedigree around a given person with a known genetic mutation, based on US census data. Pedigree will also track mutation status of all members. Pedigree is built down to children, back to grandparents, and out to cousins. There is also a function to generate pedigrees without genetic mutations.
+License: MIT + file LICENSE
+Imports: 
+  dplyr,
+  stats
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.3
+LazyData: true
