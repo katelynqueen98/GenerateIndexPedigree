@@ -1,0 +1,83 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%",
+  dpi = 320
+)
+```
+
+<!-- badges: start -->
+[![CRAN status](https://www.r-pkg.org/badges/version-ago/modACDC)](https://cran.r-project.org/package=modACDC)
+[![CRAN downloads](http://cranlogs.r-pkg.org/badges/grand-total/modACDC)](https://cran.r-project.org/package=modACDC)
+<!-- badges: end -->
+
+# GenerateIndexPedigree
+
+A series of functions to generate a pedigree around a given person with a known genetic mutation, based on US census data. Pedigree will also track mutation status of all members. Pedigree is built down to children, back to grandparents, and out to cousins. There is also a function to generate pedigrees without genetic mutations.
+
+## Installation
+
+You can install the development, GitHub version of this package with:
+
+```{r installation, eval=FALSE}
+install.packages("remotes")
+remotes::install_github("katelynqueen98/GenerateIndexPedigree")
+```
+
+## Examples
+
+The main functions of the package, `GenerateIndexPedigree()` and `GeneratePedigree()` provide many parameter options. Here is a basic pedigree of a 30-year-old female with a mutation in BRCA1, which has a *de novo* mutation rate of 0.005.
+
+```{r default_example}
+library(GenerateIndexPedigree)
+set.seed(123)
+GenerateIndexPedigree(age = 30,
+                      sex = "F",
+                      variant = "BRCA1",
+                      denovo_rate = 0.005)
+```
+
+By default, all children that will ever be born from an individual are included, regardless of if they have been born yet. This is shown by negative ages, indicating the child will be born in a future year. These individuals can be excluded by setting parameter `keep_future_children` to `FALSE`
+
+```{r no_future_children_example}
+set.seed(123)
+GenerateIndexPedigree(age = 30,
+                      sex = "F",
+                      variant = "BRCA1",
+                      denovo_rate = 0.005,
+                      keep_future_children = FALSE)
+
+```
+
+Additionally, the *de novo* status of each generational mutation (index, parent, grandparent) is simulated using either the default rate of 2e-06 or the rate given in parameter `denovo_rate`. If the *de novo* status of the index case is known, it can be supplied in parameter `is_denovo`.
+
+```{r denovo_example}
+set.seed(123)
+GenerateIndexPedigree(age = 30,
+                      sex = "F",
+                      variant = "BRCA1",
+                      keep_future_children = FALSE,
+                      is_denovo = TRUE,
+                      verbose = TRUE)
+
+```
+
+Finally, a pedigree without any mutation information can be generated using the `GeneratePedigree()` function.
+
+```{r no_mutation_example}
+set.seed(123)
+GeneratePedigree(age = 30,
+                 sex = "F",
+                 keep_future_children = FALSE)
+```
+
+
+
