@@ -1,7 +1,6 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 <!-- badges: start -->
-
 <!-- badges: end -->
 
 # GenerateIndexPedigree
@@ -187,4 +186,95 @@ GeneratePedigree(age = 30,
 #> 15  82   F PaternalGrandmother PaternalGreatGrandparents
 #> 16  85   M PaternalGrandfather PaternalGreatGrandparents
 #> 17  63   F      PaternalAunt_1      PaternalGrandparents
+```
+
+## Simulating many pedigrees
+
+Average family sizes can be recapitulated by simulating large numbers of
+pedigrees. Here, we simulate 10,000 pedigrees from 30-year-olds with a
+BRCA1 mutation. We can also track the number of positive cascade tests
+generated in family members of testing age, 20 - 65.
+
+``` r
+
+# simulation - 10K pedigrees of given age, random sex
+PedigreeSimulation <- function(indexAge,
+                               nsim = 10000,
+                               verbose = FALSE) {
+  # set up 
+  pedigreeSummary <- data.frame(indexAge = numeric(nsim),
+                                indexVariant = character(nsim),
+                                indexSex = character(nsim),
+                                DNM = logical(nsim),
+                                numKids = numeric(nsim),
+                                possibleNumCascadeTests = numeric(nsim),
+                                numCascadeTests = numeric(nsim),
+                                numCascadePositives = numeric(nsim))
+  
+  # simulate
+  for (i in 1:nsim) {
+    variant <- "BRCA1"
+    
+    # simulate pedigree
+    sex <- sample(c("M", "F"), 1)
+    ped <- GenerateIndexPedigree(age = indexAge,
+                                 sex = sex,
+                                 variant = variant,
+                                 denovo_rate = 0.005)
+    
+    # fix data type
+    ped$Age <- as.numeric(ped$Age)
+    
+    # summary stats - index
+    pedigreeSummary$indexAge[i]     <- indexAge
+    pedigreeSummary$indexVariant[i] <- variant
+    pedigreeSummary$indexSex[i]     <- sex
+    pedigreeSummary$numKids[i]      <- sum(grepl("Child", ped$RelationshipToIndex))
+    pedigreeSummary$DNM[i]          <- ifelse(isTRUE(ped$DeNovo[which(ped$RelationshipToIndex == "Self")]), TRUE, FALSE)
+    
+    # summary stats - pedigree
+    ped_inAgeRange <- ped[which(ped$Age >= (indexAge - 10) & 
+                                  ped$Age <= (indexAge + 35)), ]
+    pedigreeSummary$possibleNumCascadeTests[i] <- nrow(ped_inAgeRange) - 1
+    pedigreeSummary$numCascadeTests[i] <- max(nrow(ped_inAgeRange[which(ped_inAgeRange$UptakeTesting == "Yes"), ]) - 1, 0)
+    pedigreeSummary$numCascadePositives[i] <- max(nrow(ped_inAgeRange[which(ped_inAgeRange$UptakeTesting == "Yes" 
+                                            & ped_inAgeRange$Variant == variant), ]) - 1, 0)
+  }
+  
+  # fix class of de novo
+  pedigreeSummary$DNM <- as.logical(pedigreeSummary$DNM)
+  
+  # to return...
+  pedigreeSummary
+  print(paste0("**************** ", format(nsim, big.mark = ",", scientific = FALSE),
+               " pedigrees of 30 year old index case born in ", 
+               2026 - indexAge, " ****************"))
+  print("Number of Children of Index:")
+  print(summary(pedigreeSummary$numKids))
+  print("Number of Relatives of testable age:")
+  print(summary(pedigreeSummary$possibleNumCascadeTests))
+  print("Number of Cascade Tests:")
+  print(summary(pedigreeSummary$numCascadeTests))
+  print("Number of Cascade Positives:")
+  print(summary(pedigreeSummary$numCascadePositives))
+  print("Index case de novo mutation rate:")
+  print(round(sum(pedigreeSummary$DNM)/nsim, 4))
+}
+
+PedigreeSimulation(30)
+#> [1] "**************** 10,000 pedigrees of 30 year old index case born in 1996 ****************"
+#> [1] "Number of Children of Index:"
+#>    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+#>   0.000   0.000   2.000   1.581   2.000   6.000 
+#> [1] "Number of Relatives of testable age:"
+#>    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+#>   1.000   6.000   8.000   7.974  10.000  27.000 
+#> [1] "Number of Cascade Tests:"
+#>    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+#>   0.000   0.000   2.000   2.488   4.000  13.000 
+#> [1] "Number of Cascade Positives:"
+#>    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+#>  0.0000  0.0000  0.0000  0.7414  1.0000  8.0000 
+#> [1] "Index case de novo mutation rate:"
+#> [1] 0.0061
 ```

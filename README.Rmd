@@ -15,8 +15,7 @@ knitr::opts_chunk$set(
 ```
 
 <!-- badges: start -->
-[![CRAN status](https://www.r-pkg.org/badges/version-ago/modACDC)](https://cran.r-project.org/package=modACDC)
-[![CRAN downloads](http://cranlogs.r-pkg.org/badges/grand-total/modACDC)](https://cran.r-project.org/package=modACDC)
+
 <!-- badges: end -->
 
 # GenerateIndexPedigree
@@ -80,4 +79,77 @@ GeneratePedigree(age = 30,
 ```
 
 
+## Simulating many pedigrees
+
+Average family sizes can be recapitulated by simulating large numbers of pedigrees. Here, we simulate 10,000 pedigrees from 30-year-olds with a BRCA1 mutation. We can also track the number of positive cascade tests generated in family members of testing age, 20 - 65.
+
+```{r generations_simulation}
+
+# simulation - 10K pedigrees of given age, random sex
+PedigreeSimulation <- function(indexAge,
+                               nsim = 10000,
+                               verbose = FALSE) {
+  # set up 
+  pedigreeSummary <- data.frame(indexAge = numeric(nsim),
+                                indexVariant = character(nsim),
+                                indexSex = character(nsim),
+                                DNM = logical(nsim),
+                                numKids = numeric(nsim),
+                                possibleNumCascadeTests = numeric(nsim),
+                                numCascadeTests = numeric(nsim),
+                                numCascadePositives = numeric(nsim))
+  
+  # simulate
+  for (i in 1:nsim) {
+    variant <- "BRCA1"
+    
+    # simulate pedigree
+    sex <- sample(c("M", "F"), 1)
+    ped <- GenerateIndexPedigree(age = indexAge,
+                                 sex = sex,
+                                 variant = variant,
+                                 denovo_rate = 0.005)
+    
+    # fix data type
+    ped$Age <- as.numeric(ped$Age)
+    
+    # summary stats - index
+    pedigreeSummary$indexAge[i]     <- indexAge
+    pedigreeSummary$indexVariant[i] <- variant
+    pedigreeSummary$indexSex[i]     <- sex
+    pedigreeSummary$numKids[i]      <- sum(grepl("Child", ped$RelationshipToIndex))
+    pedigreeSummary$DNM[i]          <- ifelse(isTRUE(ped$DeNovo[which(ped$RelationshipToIndex == "Self")]), TRUE, FALSE)
+    
+    # summary stats - pedigree
+    ped_inAgeRange <- ped[which(ped$Age >= (indexAge - 10) & 
+                                  ped$Age <= (indexAge + 35)), ]
+    pedigreeSummary$possibleNumCascadeTests[i] <- nrow(ped_inAgeRange) - 1
+    pedigreeSummary$numCascadeTests[i] <- max(nrow(ped_inAgeRange[which(ped_inAgeRange$UptakeTesting == "Yes"), ]) - 1, 0)
+    pedigreeSummary$numCascadePositives[i] <- max(nrow(ped_inAgeRange[which(ped_inAgeRange$UptakeTesting == "Yes" 
+                                            & ped_inAgeRange$Variant == variant), ]) - 1, 0)
+  }
+  
+  # fix class of de novo
+  pedigreeSummary$DNM <- as.logical(pedigreeSummary$DNM)
+  
+  # to return...
+  pedigreeSummary
+  print(paste0("**************** ", format(nsim, big.mark = ",", scientific = FALSE),
+               " pedigrees of 30 year old index case born in ", 
+               2026 - indexAge, " ****************"))
+  print("Number of Children of Index:")
+  print(summary(pedigreeSummary$numKids))
+  print("Number of Relatives of testable age:")
+  print(summary(pedigreeSummary$possibleNumCascadeTests))
+  print("Number of Cascade Tests:")
+  print(summary(pedigreeSummary$numCascadeTests))
+  print("Number of Cascade Positives:")
+  print(summary(pedigreeSummary$numCascadePositives))
+  print("Index case de novo mutation rate:")
+  print(round(sum(pedigreeSummary$DNM)/nsim, 4))
+}
+
+PedigreeSimulation(30)
+
+```
 
