@@ -2,11 +2,6 @@
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 <!-- badges: start -->
 
-[![CRAN
-status](https://www.r-pkg.org/badges/version-ago/modACDC)](https://cran.r-project.org/package=modACDC)
-[![CRAN
-downloads](http://cranlogs.r-pkg.org/badges/grand-total/modACDC)](https://cran.r-project.org/package=modACDC)
-[![status](https://tinyverse.netlify.com/badge/modACDC)](https://CRAN.R-project.org/package=modACDC)
 <!-- badges: end -->
 
 # GenerateIndexPedigree
