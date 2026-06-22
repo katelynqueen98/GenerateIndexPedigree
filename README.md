@@ -1,6 +1,11 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 <!-- badges: start -->
+
+[![CRAN
+status](https://www.r-pkg.org/badges/version-ago/GenerateIndexPedigree)](https://CRAN.R-project.org/package=GenerateIndexPedigree)
+[![CRAN
+downloads](http://cranlogs.r-pkg.org/badges/grand-total/GenerateIndexPedigree)](https://CRAN.R-project.org/package=GenerateIndexPedigree)
 <!-- badges: end -->
 
 # GenerateIndexPedigree
@@ -13,7 +18,13 @@ function to generate pedigrees without genetic mutations.
 
 ## Installation
 
-You can install the development, GitHub version of this package with:
+You can install the package directly from CRAN with:
+
+``` r
+install.packages("GenerateIndexPedigree")
+```
+
+Or you can install the development, GitHub version of this package with:
 
 ``` r
 install.packages("remotes")
